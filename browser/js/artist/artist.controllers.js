@@ -2,41 +2,16 @@
 
 /* ARTISTS (PLURAL) CONTROLLER */
 
-juke.controller('ArtistsCtrl', function ($scope, $log, $rootScope, ArtistFactory) {
-
-  $scope.$on('viewSwap', function (event, data) {
-    if (data.name !== 'allArtists') return $scope.showMe = false;
-    $scope.showMe = true;
-  });
-
-  $scope.viewOneArtist = function (artist) {
-    $rootScope.$broadcast('viewSwap', { name: 'oneArtist', id: artist._id });
-  };
-
-  ArtistFactory.fetchAll()
-  .then(function (artists) {
-    $scope.artists = artists;
-  })
-  .catch($log.error);
+juke.controller('ArtistsCtrl', function ($scope, $log, $rootScope, ArtistFactory, artists) {
+  $scope.artists = artists;
 
 });
 
 /* ARTIST (SINGULAR) CONTROLLER */
 
-juke.controller('ArtistCtrl', function ($scope, $log, ArtistFactory, PlayerFactory, $rootScope) {
+juke.controller('ArtistCtrl', function ($scope, $log, ArtistFactory, PlayerFactory, $rootScope, $stateParams, artist) {
+  $scope.artist = artist;
 
-  $scope.$on('viewSwap', function (event, data) {
-
-    if (data.name !== 'oneArtist') return $scope.showMe = false;
-    $scope.showMe = true;
-
-    ArtistFactory.fetchById(data.id)
-    .then(function (artist) {
-      $scope.artist = artist;
-    })
-    .catch($log.error);
-
-  });
 
   $scope.getCurrentSong = function () {
     return PlayerFactory.getCurrentSong();
@@ -56,8 +31,40 @@ juke.controller('ArtistCtrl', function ($scope, $log, ArtistFactory, PlayerFacto
     }
   };
 
-  $scope.viewOneAlbum = function (album) {
-    $rootScope.$broadcast('viewSwap', { name: 'oneAlbum', id: album._id });
-  };
+});
+
+juke.config(function ($stateProvider, $urlRouterProvider) {
+  $stateProvider.state('artistsList', {
+    url: '/artists',
+    templateUrl: '/views/artists.html',
+    resolve: {
+      artists: function(ArtistFactory) {
+        return ArtistFactory.fetchAll();
+      }   
+    },
+    controller: 'ArtistsCtrl' 
+  })
+  .state("artistList", {
+    url: "/artist/:id",
+    templateUrl: "views/artist.html",
+    resolve: {
+      artist: function(ArtistFactory, $stateParams) {
+        return ArtistFactory.fetchById($stateParams.id);
+      }
+    },
+    controller: "ArtistCtrl"
+  })
+  .state("artistList.songs", {
+    url: "/songs",
+    templateUrl: "views/artist_songs.html",
+    controller: "ArtistCtrl"
+  })
+  .state("artistList.albums", {
+    url: "/albums",
+    templateUrl: "views/artist_albums.html",
+    controller: "ArtistCtrl"
+  })
+  //$urlRouterProvider.when('/artist' , '/artist'+$stateParams+'/album')
 
 });
+

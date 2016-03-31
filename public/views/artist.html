@@ -1,0 +1,9 @@
+<div>
+  <h3>{{ artist.name }}</h3>
+  <ul class="nav nav-tabs">
+    <li><a ui-sref="artistList.albums({id:artist._id})">ALBUMS</a></li>
+    <li><a ui-sref="artistList.songs({id:artist._id})">SONGS</a></li>
+  </ul>
+  <ui-view></ui-view>
+</div>
+
