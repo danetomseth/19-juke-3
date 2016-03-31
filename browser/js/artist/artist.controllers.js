@@ -1,39 +1,21 @@
 'use strict';
 
-/* ARTISTS (PLURAL) CONTROLLER */
-
-juke.controller('ArtistsCtrl', function ($scope, $log, $rootScope, ArtistFactory, artists) {
-  $scope.artists = artists;
-
-});
-
 /* ARTIST (SINGULAR) CONTROLLER */
 
-juke.controller('ArtistCtrl', function ($scope, $log, ArtistFactory, PlayerFactory, $rootScope, $stateParams, artist) {
+juke.controller('ArtistCtrl', function ($scope, PlayerFactory, artist) {
   $scope.artist = artist;
-
-
-  $scope.getCurrentSong = function () {
-    return PlayerFactory.getCurrentSong();
-  };
-
+  $scope.getCurrentSong = PlayerFactory.getCurrentSong;
   $scope.isPlaying = function (song) {
     return PlayerFactory.isPlaying() && PlayerFactory.getCurrentSong() === song;
   };
-
   $scope.toggle = function (song) {
-    if (song !== PlayerFactory.getCurrentSong()) {
-      PlayerFactory.start(song, $scope.artist.songs);
-    } else if ( PlayerFactory.isPlaying() ) {
-      PlayerFactory.pause();
-    } else {
-      PlayerFactory.resume();
-    }
+    (song !== PlayerFactory.getCurrentSong()) ?
+      PlayerFactory.start(song, $scope.artist.songs):
+			PlayerFactory[PlayerFactory.isPlaying() ? "pause": "resume"]();
   };
-
 });
 
-juke.config(function ($stateProvider, $urlRouterProvider) {
+juke.config(function ($stateProvider) {
   $stateProvider.state('artistsList', {
     url: '/artists',
     templateUrl: '/views/artists.html',
@@ -42,7 +24,9 @@ juke.config(function ($stateProvider, $urlRouterProvider) {
         return ArtistFactory.fetchAll();
       }   
     },
-    controller: 'ArtistsCtrl' 
+    controller: function($scope, artists) {
+		  $scope.artists = artists;
+		}
   })
   .state("artistList", {
     url: "/artist/:id",
@@ -64,7 +48,4 @@ juke.config(function ($stateProvider, $urlRouterProvider) {
     templateUrl: "views/artist_albums.html",
     controller: "ArtistCtrl"
   })
-  //$urlRouterProvider.when('/artist' , '/artist'+$stateParams+'/album')
-
 });
-

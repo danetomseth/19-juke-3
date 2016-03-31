@@ -1,6 +1,6 @@
 'use strict';
 
-juke.controller('PlayerCtrl', function ($scope, $rootScope, PlayerFactory) {
+juke.controller('PlayerCtrl', function ($scope, PlayerFactory) {
 
   angular.extend($scope, PlayerFactory); // copy props from param2 to param1
 

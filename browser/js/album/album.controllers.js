@@ -2,39 +2,21 @@
 
 /* ALBUMS (SINGULAR) CONTROLLER */
 
-juke.controller('AlbumCtrl', function ($scope, $log, PlayerFactory, AlbumFactory, $stateParams, album, $location) {
+juke.controller('AlbumCtrl', function ($scope, PlayerFactory, album, $location) {
   album.url = $location.$$absUrl;
   $scope.album = album;
-
-
   $scope.toggle = function (song) {
-    if (song !== PlayerFactory.getCurrentSong()) {
-      PlayerFactory.start(song, $scope.album.songs);
-    } else if ( PlayerFactory.isPlaying() ) {
-      PlayerFactory.pause();
-    } else {
-      PlayerFactory.resume();
-    }
+    (song !== PlayerFactory.getCurrentSong()) ?
+      PlayerFactory.start(song, $scope.album.songs):
+			PlayerFactory[PlayerFactory.isPlaying() ? "pause": "resume"]();
   };
-
-  $scope.getCurrentSong = function () {
-    return PlayerFactory.getCurrentSong();
-  };
-
+  $scope.getCurrentSong = PlayerFactory.getCurrentSong;
   $scope.isPlaying = function (song) {
     return PlayerFactory.isPlaying() && PlayerFactory.getCurrentSong() === song;
   };
-
 });
 
 /* ALBUMS (PLURAL) CONTROLLER */
-
-juke.controller('AlbumsCtrl', function ($scope, $log, $rootScope, PlayerFactory, AlbumFactory, albums) {
-  $scope.albums = albums;
-
-});
-
-
 
 juke.config(function ($stateProvider) {
   $stateProvider.state('albumsList', {
@@ -45,9 +27,11 @@ juke.config(function ($stateProvider) {
         return AlbumFactory.fetchAll();
       }
     },
-    controller: 'AlbumsCtrl' 
-  });
-  $stateProvider.state('albumList', {
+    controller: function ($scope, albums) {
+		  $scope.albums = albums;
+	  }
+  })
+  .state('albumList', {
     url: '/albums/:id',
     templateUrl: '/views/album.html',
     resolve: {
@@ -58,14 +42,3 @@ juke.config(function ($stateProvider) {
     controller: 'AlbumCtrl'
   });
 });
-
-
-
-
-
-
-
-
-
-
-
